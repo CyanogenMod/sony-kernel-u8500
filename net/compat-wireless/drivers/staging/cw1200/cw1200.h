@@ -61,6 +61,8 @@
 #define CW1200_JOIN_TIMEOUT		(1 * HZ)
 #define CW1200_AUTH_TIMEOUT		(5 * HZ)
 
+#define BSS_LOSS_CHECKING_MAX_TRY	10
+
 /* Please keep order */
 enum cw1200_join_status {
 	CW1200_JOIN_STATUS_PASSIVE = 0,
@@ -278,6 +280,7 @@ struct cw1200_common {
 	int			delayed_link_loss;
 	spinlock_t		bss_loss_lock;
 	int			bss_loss_status;
+	int			bss_loss_checking;
 	int			bss_loss_confirm_id;
 
 	/* TX rate policy cache */

@@ -158,6 +158,7 @@ void cw1200_stop(struct ieee80211_hw *dev)
 	priv->delayed_link_loss = 0;
 	spin_lock(&priv->bss_loss_lock);
 	priv->bss_loss_status = CW1200_BSS_LOSS_NONE;
+	priv->bss_loss_checking = 0;
 	spin_unlock(&priv->bss_loss_lock);
 
 	priv->join_status = CW1200_JOIN_STATUS_PASSIVE;
@@ -1102,6 +1103,7 @@ void cw1200_event_handler(struct work_struct *work)
 			priv->delayed_link_loss = 0;
 			spin_lock(&priv->bss_loss_lock);
 			priv->bss_loss_status = CW1200_BSS_LOSS_NONE;
+			priv->bss_loss_checking = 0;
 			spin_unlock(&priv->bss_loss_lock);
 			cancel_delayed_work_sync(&priv->bss_loss_work);
 			cancel_delayed_work_sync(&priv->connection_loss_work);
@@ -1168,6 +1170,7 @@ void cw1200_bss_loss_work(struct work_struct *work)
 		return;
 	} else if (priv->bss_loss_status == CW1200_BSS_LOSS_CONFIRMING) {
 		priv->bss_loss_status = CW1200_BSS_LOSS_NONE;
+		priv->bss_loss_checking = 0;
 		spin_unlock(&priv->bss_loss_lock);
 		return;
 	}
@@ -1192,6 +1195,7 @@ report:
 
 	spin_lock(&priv->bss_loss_lock);
 	priv->bss_loss_status = CW1200_BSS_LOSS_NONE;
+	priv->bss_loss_checking = 0;
 	spin_unlock(&priv->bss_loss_lock);
 }
 

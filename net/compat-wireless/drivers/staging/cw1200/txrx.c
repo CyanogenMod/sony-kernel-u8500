@@ -1041,6 +1041,17 @@ void cw1200_tx_confirm_cb(struct cw1200_common *priv,
 			ht_flags |= IEEE80211_TX_RC_GREEN_FIELD;
 
 		if (likely(!arg->status)) {
+			spin_lock(&priv->bss_loss_lock);
+			if ((priv->bss_loss_status == CW1200_BSS_LOSS_CONFIRMING) &&
+			    (priv->bss_loss_checking < BSS_LOSS_CHECKING_MAX_TRY)) {
+				priv->bss_loss_status = CW1200_BSS_LOSS_CHECKING;
+				priv->bss_loss_checking++;
+				spin_unlock(&priv->bss_loss_lock);
+				cancel_delayed_work(&priv->bss_loss_work);
+				queue_delayed_work(priv->workqueue,
+                                          &priv->bss_loss_work, 0);
+			} else
+				spin_unlock(&priv->bss_loss_lock);
 			tx->flags |= IEEE80211_TX_STAT_ACK;
 			priv->cqm_tx_failure_count = 0;
 			++tx_count;
@@ -1059,6 +1070,7 @@ void cw1200_tx_confirm_cb(struct cw1200_common *priv,
 					arg->packetID) {
 				priv->bss_loss_status =
 					CW1200_BSS_LOSS_CONFIRMED;
+				priv->bss_loss_checking = 0;
 				spin_unlock(&priv->bss_loss_lock);
 				cancel_delayed_work(&priv->bss_loss_work);
 				queue_delayed_work(priv->workqueue,
