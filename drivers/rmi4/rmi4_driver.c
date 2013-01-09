@@ -1640,7 +1640,7 @@ static int rmi4_core_driver_write_data(struct rmi4_function_device *fdev,
 	}
 
 exit:
-	mutex_unlock(&ddata->pdt_lock);
+	UNLOCK_PDT(ddata);
 	return err;
 }
 
