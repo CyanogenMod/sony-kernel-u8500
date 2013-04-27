@@ -21,7 +21,6 @@
 #include <mach/pm.h>
 #include <mach/pm-timer.h>
 #include <mach/context.h>
-#include <mach/id.h>
 
 #include <plat/mtu.h>
 
@@ -725,12 +724,8 @@ static int __init cpuidle_driver_init(void)
 	int cpu;
 
 	/* Configure wake up reasons */
-	if (cpu_is_u9500())
-		prcmu_enable_wakeups(PRCMU_WAKEUP(ARM) | PRCMU_WAKEUP(RTC) |
-				     PRCMU_WAKEUP(ABB) | PRCMU_WAKEUP(HSI0));
-	else
-		prcmu_enable_wakeups(PRCMU_WAKEUP(ARM) | PRCMU_WAKEUP(RTC) |
-				     PRCMU_WAKEUP(ABB));
+	prcmu_enable_wakeups(PRCMU_WAKEUP(ARM) | PRCMU_WAKEUP(RTC) |
+			     PRCMU_WAKEUP(ABB));
 
 	ux500_ci_dbg_init();
 

@@ -59,6 +59,7 @@ include $(BUILD_PREBUILT)
 # command line or by an environment variable.
 # If KERNEL_DEFCONFIG is set to 'local', configuration is skipped.
 # This is useful if you want to play with your own, custom configuration.
+# KERNEL_DEFCONFIG:=riogrande_nypon_defconfig
 
 build-kernel:
 

@@ -322,7 +322,8 @@ void cw1200_scan_complete_cb(struct cw1200_common *priv,
 void cw1200_clear_recent_scan_work(struct work_struct *work)
 {
 	struct cw1200_common *priv =
-		container_of(work, struct cw1200_common, clear_recent_scan_work.work);
+		container_of(work, struct cw1200_common,
+				clear_recent_scan_work.work);
 	atomic_xchg(&priv->recent_scan, 0);
 }
 

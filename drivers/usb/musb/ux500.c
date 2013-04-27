@@ -400,6 +400,24 @@ static int musb_otg_notifications(struct notifier_block *nb,
 		pm_runtime_get_sync(musb->controller);
 		ux500_restore_context(musb);
 		break;
+/**
+ *	- The Vbus information is sent by the Phy to the controller
+ *           through RxCMD.
+ *	- Vbus information sent through RxCMD has to be masked
+ *
+ *	- If bit[6:3]=8, system is in ACA-RID-A then
+ *		- In ULPI register, mask VBUSVLD by writing before setting
+ *	          the session bit of the MUSB
+ *			* Register ULPI Vbuscontrol (offset - 0x70)  = 0x2
+ *			* In Interface control register @0x08 = x60
+ *	                * In OTG control register @0x0B = x80
+ *		- On it_link_update (x0E2B bit7) notification
+ *			and link_status <> x8,
+ *	          SW must reset previous settings:
+ *			* Register ULPI Vbuscontrol (offset - 0x70)  = 0
+ *			* In Interface control register @0x09 = x60
+ *	                * In OTG control register @0x0C = x80
+ */
 	case USB_EVENT_RIDA:
 		busctl = musb_read_ulpi_buscontrol(musb->mregs);
 		busctl |= 0x02;
@@ -449,18 +467,10 @@ static void ux500_musb_set_vbus(struct musb *musb, int is_on)
 	u8		devctl;
 	unsigned long timeout = jiffies + msecs_to_jiffies(1000);
 	int ret = 1;
-#ifdef	CONFIG_USB_OTG_20
-	int val = 0;
-#endif
 	/* HDRC controls CPEN, but beware current surges during device
 	 * connect.  They can trigger transient overcurrent conditions
 	 * that must be ignored.
 	 */
-#ifdef	CONFIG_USB_OTG_20
-	val = musb_readb(musb->mregs, MUSB_MISC);
-	val |= 0x1C;
-	musb_writeb(musb->mregs, MUSB_MISC, val);
-#endif
 	devctl = musb_readb(musb->mregs, MUSB_DEVCTL);
 
 	if (is_on) {

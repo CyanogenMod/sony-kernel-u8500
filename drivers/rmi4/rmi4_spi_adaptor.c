@@ -256,7 +256,7 @@ static int rmi4_spi_adapter_xfer(struct device *dev, const u8 *txbuf,
 	}
 
 	if (n_rx)
-		rmi4_spi_adapter_dbg_dump(dev, txbuf, n_tx,
+		rmi4_spi_adapter_dbg_dump(dev, rxbuf, n_rx,
 					  "SPI received bytes:");
 
 error_exit:
