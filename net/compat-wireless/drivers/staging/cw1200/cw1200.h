@@ -2,7 +2,7 @@
  * Common private data for ST-Ericsson CW1200 drivers
  *
  * Copyright (c) 2010, ST-Ericsson
- * Copyright (C) 2012 Sony Mobile Communications AB.
+ * Copyright (C) 2012 Sony Mobile Communications AB. All rights reserved.
  * Author: Dmitry Tarnyagin <dmitry.tarnyagin@stericsson.com>
  *
  * Based on the mac80211 Prism54 code, which is
@@ -52,6 +52,11 @@
 #define CW1200_MAX_REQUEUE_ATTEMPTS	(5)
 
 #define CW1200_MAX_TID			(8)
+
+#define CW1200_BLOCK_ACK_CNT		(30)
+#define CW1200_BLOCK_ACK_THLD		(800)
+#define CW1200_BLOCK_ACK_HIST		(3)
+#define CW1200_BLOCK_ACK_INTERVAL	(1 * HZ / CW1200_BLOCK_ACK_HIST)
 
 #define CW1200_JOIN_TIMEOUT		(1 * HZ)
 #define CW1200_AUTH_TIMEOUT		(5 * HZ)
@@ -167,6 +172,15 @@ struct cw1200_common {
 	struct work_struct		update_filtering_work;
 	struct work_struct		set_beacon_wakeup_period_work;
 	u8				ba_tid_mask;
+	int				ba_acc;
+	int				ba_cnt;
+	int				ba_cnt_rx;
+	int				ba_acc_rx;
+	int				ba_hist;
+	struct timer_list		ba_timer;
+	spinlock_t			ba_lock;
+	bool				ba_ena;
+	struct work_struct              ba_work;
 	struct cw1200_pm_state		pm_state;
 	struct wsm_p2p_ps_modeinfo	p2p_ps_modeinfo;
 	struct wsm_uapsd_info		uapsd_info;
@@ -174,8 +188,8 @@ struct cw1200_common {
 	u8				conf_listen_interval;
 	u32				listen_interval;
 	u32				erp_info;
-	bool				setup_mac_done;
 	u32				rts_threshold;
+	bool				setup_mac_done;
 
 	/* BH */
 	atomic_t			bh_rx;
@@ -292,7 +306,6 @@ struct cw1200_common {
 	u8			action_linkid;
 #endif
 	atomic_t		hw_state;
-	bool 			block_ack_enabled;
 };
 
 struct cw1200_sta_priv {
